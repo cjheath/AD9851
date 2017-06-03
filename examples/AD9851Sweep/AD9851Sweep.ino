@@ -4,7 +4,7 @@
  * Note the calibration constant below; this is for my board.
  * For a very high step rate, disable the serial printing.
  * 
- * You'll also need to change the definition of AD9851_CS_PIN
+ * You'll also need to change the definition of AD9851_FQ_UD_PIN
  * to reflect the way you have your module wired up.
  */
 #include <AD9851.h>
@@ -15,12 +15,15 @@
 #define STEP          100000      /* Step in Hz. Set to 0 for constant frequency */
 #define RATE          5000        /* ms between steps */
 
-#define CALIBRATION   9999941     /* Set this to the frequency when set to 10MHz */
+#define CALIBRATION   9999943     /* Set this to the frequency when set to 10MHz */
+//#define CALIBRATION   10000000     /* Set this to the frequency when set to 10MHz */
 
-#define AD9851_CS_PIN  2
+#define AD9851_FQ_UD_PIN      2
+#define AD9851_RESET_PIN      3
 // And MOSI=11, SCK=13
 
-AD9851 dds(AD9851_CS_PIN);
+class MyAD9851 : public AD9851<AD9851_RESET_PIN, AD9851_FQ_UD_PIN, CALIBRATION> {};
+MyAD9851 dds;
 unsigned long next_update;        /* The millis() value for the next update */
 
 void setup() {
@@ -32,8 +35,8 @@ void setup() {
 void loop() {
   static  unsigned long freq = CENTRE;
 
-  dds.setFrequency(freq*10000000ULL/CALIBRATION);
-  //dds.setFrequency(freq);
+  //dds.setFrequency(freq*10000000ULL/(unsigned long long)CALIBRATION);
+  dds.setFrequency(freq);
   Serial.println(freq);
 
   if ((freq += STEP) > CENTRE+DEVIATION)
