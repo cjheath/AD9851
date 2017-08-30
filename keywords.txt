@@ -1,2 +1,6 @@
 AD9851	KEYWORD1
+reset	KEYWORD1
+setClock	KEYWORD1
 setFrequency	KEYWORD1
+frequencyDelta	KEYWORD1
+setDelta	KEYWORD1

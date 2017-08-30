@@ -10,19 +10,20 @@
 #include <AD9851.h>
 #include <SPI.h>
 
+/* Sweep details */
 #define CENTRE        10000000UL  /* Hz */
 #define DEVIATION     500000      /* Deviation in Hz (above and below) */
 #define STEP          100000      /* Step in Hz. Set to 0 for constant frequency */
 #define RATE          5000        /* ms between steps */
 
-#define CALIBRATION   9999943     /* Set this to the frequency when set to 10MHz */
-//#define CALIBRATION   10000000     /* Set this to the frequency when set to 10MHz */
+//#define CALIBRATION   0         /* Parts-per billion to adjust the core clock from the reference */
+#define CALIBRATION   5700        /* Calibration for my test module; it runs fast */
 
 #define AD9851_FQ_UD_PIN      2
 #define AD9851_RESET_PIN      3
 // And MOSI=11, SCK=13
 
-class MyAD9851 : public AD9851<AD9851_RESET_PIN, AD9851_FQ_UD_PIN, CALIBRATION> {};
+class MyAD9851 : public AD9851<AD9851_RESET_PIN, AD9851_FQ_UD_PIN> {};
 MyAD9851 dds;
 unsigned long next_update;        /* The millis() value for the next update */
 
@@ -35,7 +36,7 @@ void setup() {
 void loop() {
   static  unsigned long freq = CENTRE;
 
-  //dds.setFrequency(freq*10000000ULL/(unsigned long long)CALIBRATION);
+  dds.setClock(CALIBRATION);
   dds.setFrequency(freq);
   Serial.println(freq);
 

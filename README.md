@@ -17,25 +17,40 @@ The SPI SCK and MOSI pins will be used automatically.
     class MyAD9851 : public AD9851<AD9851_RESET_PIN, AD9851_FQ_UD_PIN> {};
     MyAD9851 dds;
 
-If you have a good frequency counter, you can calibrate your AD9851.
-Generate 10MHz, and measure the frequency. Provide this value as the
-third template parameter:
-
-    #define CALIBRATION		9999943
-
-    class MyAD9851 : public AD9851<AD9851_RESET_PIN, AD9851_FQ_UD_PIN, CALIBRATION> {};
+The third template parameter is the core clock frequency, including
+the PLL multiplier. The AD9851 can use up to a 180MHz core clock.
 
 The fourth template parameter is the SPI data rate, default 2Mb/s.
-You should not try to alter the fifth and sixth parameters, as
-these are set by the SPI hardware used.
+You should not try to alter the fifth and sixth parameters, as these
+are set by the SPI driver.
 
-The AD9851 reset will be applied at the time this constructor is run.
+The AD9851 reset will be applied at the time the constructor is run.
 Alternatively, you can reset the chip at any time later:
 
     dds.reset();
+
+If you have a good frequency counter, you can calibrate your AD9851.
+To calibrate, use a zero calibration value, set some frequency and
+measure it as accurately as you can with a frequency counter.
+Convert that value to parts-per-billion error (positive if the
+frequency is high, negative if low) and provide that integer to
+setClock() as the calibration value instead. For example if you
+program 10MHz, but measure 1000043.2Hz, your calibration factor
+should be 4320.
+
+You must setFrequency() after calling setClock with a new calibration,
+and recalculate any stored frequency deltas.
+
+    setClock(uint32_t calibration = 0);
 
 ## Setting the frequency
 
 The setFrequency() function tells the module what frequency to generate.
 
-      dds.setFrequency(7140000UL);
+    dds.setFrequency(7140000UL);
+
+If you have to change frequency often, use frequencyDelta() to compute
+a delta value, and apply that with setDelta():
+
+    uint32_t div = dds.frequencyDelta(7140000UL);
+    dds.setDelta(div);
